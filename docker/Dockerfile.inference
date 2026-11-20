@@ -1,0 +1,14 @@
+FROM python:3.11.14-slim-bookworm
+LABEL org.opencontainers.image.source="https://github.com/its-not-ganesh/cloud-ml-hw4-mnist-k8s"
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 MODEL_DIR=/data
+WORKDIR /app
+COPY requirements/inference.txt /app/requirements/inference.txt
+RUN pip install --no-cache-dir -r requirements/inference.txt
+COPY pyproject.toml /app/
+COPY src/mnist_service/__init__.py src/mnist_service/model.py src/mnist_service/app.py src/mnist_service/preprocess.py /app/src/mnist_service/
+COPY src/mnist_service/static /app/src/mnist_service/static
+RUN pip install --no-cache-dir --no-deps . && useradd --uid 10001 --create-home app
+USER 10001:10001
+EXPOSE 8000
+ENTRYPOINT ["uvicorn", "mnist_service.app:app"]
+CMD ["--host", "0.0.0.0", "--port", "8000", "--limit-concurrency", "16", "--timeout-keep-alive", "5"]

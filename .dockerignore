@@ -1,0 +1,8 @@
+.git
+.venv
+artifacts
+evidence
+tests
+__pycache__
+.pytest_cache
+rendered

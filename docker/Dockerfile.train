@@ -1,0 +1,12 @@
+FROM python:3.11.14-slim-bookworm
+LABEL org.opencontainers.image.source="https://github.com/its-not-ganesh/cloud-ml-hw4-mnist-k8s"
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+WORKDIR /app
+COPY requirements /app/requirements
+RUN pip install --no-cache-dir -r requirements/train.txt
+COPY pyproject.toml /app/
+COPY src /app/src
+RUN pip install --no-cache-dir --no-deps . && useradd --uid 10001 --create-home app && mkdir /data && chown app:app /data
+USER 10001:10001
+ENTRYPOINT ["python", "-m", "mnist_service.train"]
+CMD ["--output-dir", "/data"]

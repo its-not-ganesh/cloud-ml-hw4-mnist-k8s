@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mnist-train
+  namespace: mnist-hw4
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      labels:
+        app: mnist-train
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: train
+          image: ghcr.io/its-not-ganesh/cloud-ml-hw4-mnist-k8s-train:main
+          command: [python, -m, mnist_service.train]
+          args: [--output-dir, /data, --epochs, "3", --threads, "2"]
+          resources:
+            requests: {cpu: "1", memory: 1Gi}
+            limits: {cpu: "2", memory: 2Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: model, mountPath: /data}
+      volumes:
+        - name: model
+          persistentVolumeClaim: {claimName: mnist-model}
