@@ -141,7 +141,8 @@ For failures, inspect `kubectl -n mnist-hw4 describe pod POD`, `describe pvc mni
 Export the checkpoint and evidence before deletion. Confirm that the live URL and model disk are no longer needed. These commands delete the demonstration and its persisted data:
 
 ```bash
-kubectl -n mnist-hw4 cp deployment/mnist-inference:/data/model.pt ./model-backup.pt
+POD=$(kubectl -n mnist-hw4 get pods -l app=mnist-inference -o jsonpath='{.items[0].metadata.name}')
+kubectl -n mnist-hw4 cp "$POD:/data/model.pt" ./model-backup.pt
 kubectl -n mnist-hw4 delete service mnist-inference
 kubectl -n mnist-hw4 delete deployment mnist-inference
 kubectl -n mnist-hw4 delete job mnist-train
